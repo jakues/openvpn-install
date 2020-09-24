@@ -437,7 +437,8 @@ else
 	echo "   1) Add a new client"
 	echo "   2) Revoke an existing client"
 	echo "   3) Remove OpenVPN"
-	echo "   4) Exit"
+	echo "   4) Custom forward only ql"
+	echo "   5) Exit"
 	read -p "Option: " option
 	until [[ "$option" =~ ^[1-4]$ ]]; do
 		echo "$option: invalid selection."
@@ -554,6 +555,51 @@ else
 			exit
 		;;
 		4)
+			apt-get install iptables-persistent net-tools -y
+			
+			MYIP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+			
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 443 -j DNAT --to-dest 10.8.0.2:443
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 443 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32440 -j DNAT --to-dest 10.8.0.2:32440
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32440 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32441 -j DNAT --to-dest 10.8.0.2:32441
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32441 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32442 -j DNAT --to-dest 10.8.0.2:32442
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32442 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32443 -j DNAT --to-dest 10.8.0.2:32443
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32443 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32444 -j DNAT --to-dest 10.8.0.2:32444
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32444 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32445 -j DNAT --to-dest 10.8.0.2:32445
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32445 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32446 -j DNAT --to-dest 10.8.0.2:32446
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32446 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32447 -j DNAT --to-dest 10.8.0.2:32447
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32447 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32448 -j DNAT --to-dest 10.8.0.2:32448
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32448 -j ACCEPT
+			iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 32449 -j DNAT --to-dest 10.8.0.2:32449
+			iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 32449 -j ACCEPT
+			iptables-save
+			
+				read -p "Are you want to check it ? [Y/y/N/n]" -n 1 -r
+				if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+					echo "Selecting only ql port"
+				else
+					echo "Selecting additional port"
+					iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 220 -j DNAT --to-dest 10.8.0.2:220
+					iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 220 -j ACCEPT
+					iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 3000 -j DNAT --to-dest 10.8.0.2:3000
+					iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 3000 -j ACCEPT
+					iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 3001 -j DNAT --to-dest 10.8.0.2:3001
+					iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 3001 -j ACCEPT
+					iptables -t nat -A PREROUTING -d $MYIP -p tcp --dport 3003 -j DNAT --to-dest 10.8.0.2:3003
+					iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 3003 -j ACCEPT
+					iptables-save
+				fi
+		;;
+		5)
 			exit
 		;;
 	esac
